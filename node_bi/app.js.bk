@@ -1,0 +1,225 @@
+const port = 55555;
+
+// -- create the socket server on the port ---
+
+const express = require('express');
+const app = express();
+//const basicAuth = require('express-basic-auth');
+//app.use(basicAuth({
+//	users: { 'bell': 'mark2022sein' },
+//	challenge: true,
+//	realm: 'foo',
+//}));
+const path = require('path');
+const favicon = require('serve-favicon');
+
+app.use(express.static(path.join(__dirname, './public')));
+app.use(favicon(__dirname + '/public/images/fav01.ico'));
+
+const fs = require('fs');
+const options = {
+	key: fs.readFileSync('/etc/letsencrypt/live/area18.cf/privkey.pem'),
+	cert: fs.readFileSync('/etc/letsencrypt/live/area18.cf/fullchain.pem'),
+}
+const https = require('https');
+const server = https.createServer(options, app)
+
+
+
+const mysql = require('mysql');
+var connection = mysql.createConnection({
+	host: '127.0.0.1',
+	user: 'azarashi',
+	password: 'gomagoma1239',
+	database: 'bi'
+});
+
+
+///////////////////////////////////
+var memberTableOrgn = {};
+var memberTable = {};
+memberTable['miki'] = [];
+///////////////////////////////////
+
+const io = require('socket.io')(server)
+console.log('BI started on port:' + port);
+
+var sql = 'SELECT * FROM memberTable';
+connection.query(sql, function (err, result) {
+	if(err){
+		console.log('[select ERROR] - ',err.message);
+		return;
+   	}
+	var obj = Object.assign({}, result);
+	var str = JSON.stringify(obj);
+
+	var member = [];
+	result.forEach(function(val){
+//		console.log('val ---------', val['user']);
+		member.push(val['user']);
+	});
+	memberTableOrgn['miki'] = member;
+//	console.log('memberTableOrgn', memberTableOrgn);
+});
+
+
+
+
+
+io.on('connection', function(socket) {
+
+	socket.on('enter', function(data) {
+
+		console.log('入出者ID：', socket.id);
+		console.log('入出者データ: ' + data);
+
+		var obj = JSON.parse(data);
+		var roomName = obj['roomName'];
+		var user = obj['user'];
+		var type = obj['type'];
+
+		socket.join(roomName);
+
+		socket.roomName = roomName;
+		socket.user = user;
+		socket.type = type;
+
+
+		//メンバー追加
+		var mList = memberTable[roomName];
+		var result = mList.indexOf(socket.user);
+		console.log('判定',result);
+		if(result < 0){
+			mList.push(user);
+			memberTable[roomName] = mList;
+			var str1 = JSON.stringify(memberTable);
+			var str2 = JSON.stringify(memberTableOrgn);
+
+			io.emit('enter_res', str1, str2);
+		}
+	});
+
+
+
+
+	socket.on('req_init', function() {
+
+		var sql = 'SELECT * FROM tb1 ORDER BY unixtime DESC LIMIT 50';
+		connection.query(sql, function (err, result) {
+			if(err){
+				console.log('[select ERROR] - ',err.message);
+				return;
+		   	}
+			var obj = Object.assign({}, result);
+			var str = JSON.stringify(obj);
+
+			io.to(socket.id).emit('res_init', str); //ここだけ限定送信
+		});
+	});
+
+	socket.on('new_info',function(data){
+
+		console.log("new_info 受信", data);
+		var obj = JSON.parse(data);
+
+		// DB記録
+		var data01 = obj['msg'];
+		var category = obj['category'];
+		var unixtime = Date.now();
+		var sql = 'INSERT INTO tb1(id, data01, category, unixtime) VALUES(0,?,?,?)';
+		var sqlParams = [data01, category, unixtime];
+		console.log(sqlParams);
+
+		var query = connection.query(sql, sqlParams, function (err, result) {
+			if(err){
+				console.log('[insert ERROR] - ',err.message);
+				return;
+		   	}
+			//全データ送信
+			var sql2 = 'SELECT * FROM tb1 ORDER BY unixtime DESC LIMIT 50';
+			connection.query(sql2, function (err, result2) {
+				if(err){
+					console.log('[select ERROR] - ',err.message);
+					return;
+			   	}
+				var obj = Object.assign({}, result2);
+				var str = JSON.stringify(obj);
+				io.emit('info_add', str); //ここは一斉送信
+			});
+		});
+		// オドテーブル保存
+		var sqlBK = 'INSERT INTO tb1BK(id, data01, category, unixtime) VALUES(0,?,?,?)';
+		var queryBK = connection.query(sqlBK, sqlParams, function (err, result) {
+			if(err){
+				console.log('[insert ERROR] - ',err.message);
+				return;
+		   	}
+		});
+	});
+
+
+	socket.on('req_del',function(id) {
+
+		var modSql = 'DELETE FROM tb1 WHERE id=?';
+		var target_id = Number(id);
+		var modSqlParams = [target_id];
+		connection.query(modSql, modSqlParams, function (err, result) {
+
+			console.log('req_del データ削除', target_id);
+			if(err){
+				console.log('[delete ERROR] - ',err.message);
+				return;
+		   	}
+			//全データ送信
+			var sql2 = 'SELECT * FROM tb1 ORDER BY unixtime DESC LIMIT 50';
+			connection.query(sql2, function (err, result2) {
+				if(err){
+					console.log('[select ERROR] - ',err.message);
+					return;
+			   	}
+				var obj = Object.assign({}, result2);
+				var str = JSON.stringify(obj);
+				io.emit('info_del', str); //ここは一斉送信
+			});
+		});
+		// 削除時間の追加アップデート
+		var unixtime = Date.now();
+
+		modSql2 = 'UPDATE tb1BK SET del = ? WHERE id = ?';
+		modSqlParams2 = [unixtime, target_id ];
+		connection.query(modSql2, modSqlParams2, function (err, res) {
+			console.log('req_del 削除時間アップデート', target_id);
+			if(err){
+				console.log('[update ERROR] - ',err.message);
+				return;
+		   	}
+		});
+	});
+
+
+	socket.on('disconnect', function() {
+
+		console.log('退出者socket.roomName：' + socket.roomName);
+		console.log('退出者socket.user：' + socket.user);
+		//メンバー削除
+		if(socket.roomName != null){
+			var mList = memberTable[socket.roomName];
+			var result = mList.indexOf(socket.user);
+			if(result >= 0){
+				mList.splice(result,1);
+				memberTable[socket.roomName] = mList;
+			}
+			console.log('mList：' + mList);
+			console.log(memberTable);
+
+			var str = JSON.stringify(memberTable);
+			io.emit('member_leave', str);
+
+		}else{
+			console.log('ヌル：socket.roomName is null !!');
+		}
+
+	});
+});
+server.listen(port)
+
