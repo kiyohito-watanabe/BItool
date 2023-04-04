@@ -1,0 +1,21 @@
+{
+	"short_name": "BI",
+	"name": "BIdashbord",
+	"display": "standalone",
+	"start_url": "dashbord.html",
+	"icons": [
+		{
+			"src": "./images/app-icon-192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "./images/maskable_icon192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "maskable"
+		}
+
+	]
+}
