@@ -1,4 +1,8 @@
-const port = 55555;
+
+/////////////////////////////////////////////
+// 健吾へ（その１）
+const port = 55555; // 必要に応じて適宜変更
+/////////////////////////////////////////////
 
 // -- create the socket server on the port ---
 
@@ -18,8 +22,13 @@ app.use(favicon(__dirname + '/public/images/fav01.ico'));
 
 const fs = require('fs');
 const options = {
+	//////////////////////////////////////////////////////////////////////////////
+	// 健吾へ（その２）
+	// Lets encrypt のssl証明書(https用)です.
+	// 自分の環境に合わせて適宜変更してください。
 	key: fs.readFileSync('/etc/letsencrypt/live/area18.cf/privkey.pem'),
 	cert: fs.readFileSync('/etc/letsencrypt/live/area18.cf/fullchain.pem'),
+	//////////////////////////////////////////////////////////////////////////////
 }
 const https = require('https');
 const server = https.createServer(options, app)
@@ -27,13 +36,18 @@ const server = https.createServer(options, app)
 
 
 const mysql = require('mysql');
+/////////////////////////////////////////////////////////
+// 健吾へ（その３）
+// データベースの設定です。
+// 必要に応じて適宜変更してください。
+// データベースについては、phpmyadminで別ファイルをインポートしてください。
 var connection = mysql.createConnection({
 	host: '127.0.0.1',
 	user: 'azarashi',
 	password: 'gomagoma1239',
 	database: 'bi'
 });
-
+//////////////////////////////////////////////////////////
 
 ///////////////////////////////////
 var memberTableOrgn = {};

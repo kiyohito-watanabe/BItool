@@ -1,0 +1,18 @@
+{
+  "name": "node_bi",
+  "version": "1.0.0",
+  "description": "bi tool by ProGress",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "azarashi jin",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-basic-auth": "^1.2.1",
+    "mysql": "^2.18.1",
+    "serve-favicon": "^2.5.0",
+    "socket.io": "^4.5.4"
+  }
+}

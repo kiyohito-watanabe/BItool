@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="common.css">
+	<script src="./js/jquery-3.5.1.min.js"></script>
+	<script type="text/javascript" src="socket.io/socket.io.js"></script>
+	<title>BI admin</title>
+</head>
+
+<body class="bd">
+	<section class="flex" style="width:100%;">
+		<div class="half_box" id="brink05">
+			<h2 class="subtitle">株式お知らせ</h2>
+			<input type="text" name="info" id="c5_txt" class="input_txt" value="" max="32" />
+			<button id="btn_c5_info" value="">追加</button>
+			<span id="c5_num">最大30文字</span>
+			<button id="c5_del" value="">削除</button>
+			<ul id="c5_info" class="elm"></ul>
+		</div>
+		<div class="half_box" id="brink09">
+			<h2 class="subtitle">商品部からのお知らせ</h2>
+			<input type="text" name="info" id="c9_txt" class="input_txt" value="" max="32" />
+			<button id="btn_c9_info" value="">追加</button>
+			<span id="c9_num">最大100文字</span>
+			<button id="c9_del" value="">削除</button>
+			<ul id="c9_info" class="elm"></ul>
+		</div>
+	</section>
+	<section class="flex" style="width:100%;">
+		<div class="half_box">
+			<hr color="#3d3d3d" size="8" noshade style="margin-top: 0px;margin-bottom: 0px;">
+			<ul class="ulkkk">
+				<li class="inner_half_box" style="height:144px;" id="brink01">
+					<h2 class="subtitle">米ドル TTM</h2>
+					<input type="number" class="input_txt" id="info_usRate" name="info" value="" max="7" step="0.1" />
+					<button id="btn_us" value="">送信</button>
+					<span id="us_num">0文字</span>
+					<span id="usRate_txt" style="font-size:1.5em;">000.000</span><span>ドル</span>
+					<p id="usRate_update">____年__月__日__:__ 更新</p>
+				</li>
+				<li class="likkk quarter_box">
+					<div>
+						<table>
+							<tr>
+								<td class="buy_txt">BUY </td>
+							</tr>
+							<tr>
+								<td><a style="white-space: nowrap;"><strong id="usBUY"
+											class="buy_valu">___.__</strong>ドル</a></td>
+							</tr>
+							<tr>
+						</table>
+					</div>
+				</li>
+				<li class="likkk quarter_box">
+					<div>
+						<table>
+							<tr>
+								<td class="sell_txt">SELL </td>
+							</tr>
+							<tr>
+								<td><a style="white-space: nowrap;"><strong id="usSELL"
+											class="sell_valu">___.__</strong>ドル</a></td>
+							</tr>
+						</table>
+					</div>
+				</li>
+			</ul>
+			<hr color="#3d3d3d" size="8" noshade style="margin-top: 0px;margin-bottom: 0px;">
+			<ul class="ulkkk">
+				<li class="inner_half_box" id="brink02">
+					<h2 class="subtitle">豪ドル TTM</h2>
+
+					<input type="number" class="input_txt" id="info_audRate" name="info" value="" max="7" step="0.1" />
+					<button id="btn_aud" value="">送信</button>
+					<span id="aud_num">0文字</span>
+					<span id="audRate_txt" style="font-size:1.5em;">000.000</span><span>豪ドル</span>
+					<p id="audRate_update">____年__月__日__:__ 更新</p>
+				</li>
+				<li class="likkk quarter_box">
+					<div>
+						<table>
+							<tr>
+								<td class="buy_txt">BUY </td>
+							</tr>
+							<tr>
+								<td><a style="white-space: nowrap;"><strong id="audBUY"
+											class="buy_valu">___.__</strong>ドル</a></td>
+							</tr>
+						</table>
+					</div>
+				</li>
+				<li class="likkk quarter_box">
+					<div>
+						<table>
+							<tr>
+								<td class="sell_txt">SELL </td>
+							</tr>
+							<tr>
+								<td><a style="white-space: nowrap;"><strong id="audSELL"
+											class="sell_valu">___.__</strong>ドル</a></td>
+							</tr>
+						</table>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div class="half_box" id="brink06">
+			<h2 class="subtitle">2週間以内の予定</h2>
+			<input type="text" name="info" id="c6_txt" class="input_txt" value="" max="32" />
+			<span id="c6_num">最大30文字</span>
+			<input type="date" id="date-input">
+			<button id="btn_c6_info" value="">追加</button>
+			<button id="c6_del" value="">削除</button>
+
+			<ul id="c6_info" class="elm"></ul>
+			<hr>
+			<p class="pright" id="c6_last_update">____年__月__日__:__ 最終更新</p>
+		</div>
+	</section>
+	<section class="flex" style="width:100%;">
+		<div class="half_box" id="brink07">
+			<h2 class="subtitle">売買停止のお知らせ</h2>
+			<input type="text" name="info" id="c7_txt" class="input_txt" value="" max="32" />
+			<button id="btn_c7_info" value="">追加</button>
+			<span id="c7_num">最大30文字</span>
+			<button id="c7_del" value="">削除</button>
+
+			<ul id="c7_info" class="elm"></ul>
+		</div>
+		<div class="half_box" id="brink08">
+			<h2 class="subtitle">枠増加のお知らせ</h2>
+			<input type="text" name="info" id="c8_txt" class="input_txt" value="" max="32" />
+			<button id="btn_c8_info" value="">追加</button>
+			<span id="c8_num">最大30文字</span>
+			<button id="c8_del" value="">削除</button>
+
+			<ul id="c8_info" class="elm"></ul>
+		</div>
+	</section>
+	<section class="flex" style="width:100%;">
+		<div class="full_box" id="brink_non">
+			<h2 class="subtitle">更新ログ</h2>
+			<ul id="logs"></ul>
+		</div>
+	</section>
+	<script src="./admin.js"></script>
+</body>
+</html>
